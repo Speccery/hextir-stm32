@@ -420,6 +420,11 @@ static inline void wakeup_pin_init(void) {
 
 #include <stdint.h>
 
+#define INCLUDE_DRIVE
+// #define INCLUDE_CLOCK
+// #define INCLUDE_SERIAL
+#define INCLUDE_PRINTER
+
 #define CONFIG_SD_BLOCKTRANSFER
 
 static inline void board_init(void) {

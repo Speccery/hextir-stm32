@@ -70,6 +70,10 @@ void spi_exchange_block(void *vdata, unsigned int length, uint8_t write) {
 	// BUGBUG MISSING
 }
 
+void sdcard_set_ss(uint8_t state) {
+	// BUGBUG MISSING
+}
+
 #else
 
 /* interrupts disabled, SPI enabled, MSB first, master mode */

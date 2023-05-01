@@ -70,9 +70,7 @@ static  tick_t getticks(void) {
 	return 0;
 }
 
-void timer_init(void) {
-	// BUGBUG MISSING
-}
+void timer_init();	// declared in main.c for STM32
 
 
 #else

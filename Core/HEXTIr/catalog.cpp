@@ -235,17 +235,29 @@ static char* left_pad_with_blanks(char *buf, uint8_t width) {
  */
 static char* format_file_size(uint32_t bytes, char* buf, uint8_t width) {
   if (number_of_digits(bytes) <= width)  {
+#ifdef STM32
+	utoa(bytes, buf, 10);
+#else
     ltoa(bytes, buf, 10);
+#endif
     left_pad_with_blanks(buf, width);
   }
   else {
     int kb = bytes / 1024;
     if ( number_of_digits(kb) + 2 <= width) {
       int rb = (bytes % 1024) / (1024 / 10.0);
+#ifdef STM32
+      utoa(kb, buf, 10);
+#else
       ltoa(kb, buf, 10);
+#endif
       int l = strlen(buf);
       buf[l] = '.';
+#ifdef STM32
+      utoa(rb, &buf[l + 1], 10);
+#else
       ltoa(rb, &buf[l + 1], 10);
+#endif
       left_pad_with_blanks(buf, width);
     }
     else {

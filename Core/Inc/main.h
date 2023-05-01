@@ -53,6 +53,8 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
+void _delay_us(int us);
+void timer_init();
 
 /* USER CODE END EFP */
 

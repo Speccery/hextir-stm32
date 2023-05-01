@@ -102,9 +102,7 @@ void spi_init(spi_speed_t speed);
 /* SD SS pin default implementation */
 
 #ifdef STM32
-void sdcard_set_ss(uint8_t state) {
-	// BUGBUG MISSING
-}
+void sdcard_set_ss(uint8_t state);
 #else
 static inline __attribute__((always_inline)) void sdcard_set_ss(uint8_t state) {
   if (state)

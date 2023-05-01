@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -60,6 +61,66 @@ static void MX_USB_OTG_FS_PCD_Init(void);
 /* USER CODE BEGIN 0 */
 int hextir_main(void);
 
+void _delay_us(int us) {
+	// here we have a microsecond delay.
+	htim10.Instance->CNT = 0;
+	HAL_TIM_Base_Start(&htim10);
+	// Just a busy loop to wait the time to pass.
+	int t = 0;
+	while(htim10.Instance->CNT < us) {
+		t++;
+	}
+	HAL_TIM_Base_Stop(&htim10);
+}
+
+void timer_init(void) {
+	// BUGBUG MISSING
+	int t=1;	// breakpoint placeholder
+}
+
+void set_busy_led(uint8_t state) {
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, state ? GPIO_PIN_RESET : GPIO_PIN_SET);
+}
+
+
+uint8_t crc7update(uint8_t crc, uint8_t data) {
+//    ;; uint8_t crc7update(uint8_t crc, uint8_t data)
+//    ;;
+//    ;; input : r24: crc, r22: data
+//    ;; output: r24: new crc
+//crc7update:
+//    ldi     r18, 8       ; number of bits to process
+//    ldi     r19, 0x09    ; CRC7 polynomial
+//    ldi     r20, 0x80    ; constant for inverting the top bit of the CRC
+//
+//loop:   lsl     r24          ; shift CRC
+//    lsl     r22          ; shift data byte
+//    brcc    0f           ; jump if top data bit was 0
+//    eor     r24, r20     ; invert top bit of CRC if not
+//0:      bst     r24, 7       ; read top bit of CRC
+//    brtc    1f           ; skip if top bit of CRC is now clear
+//    eor     r24, r19     ; apply polynomial
+//1:      dec     r18          ; decrement bit counter
+//    brne    loop         ; loop for next bit
+//    andi    r24, 0x7f    ; clear top bit of
+//    ret
+
+	const uint8_t poly = 9;
+
+	for(int i=0; i< 8; i++) {
+		crc <<= 1;
+		data <<= 1;
+		if(data & 0x80)
+			crc ^= 0x80;
+		if(crc & 0x80)
+			crc ^= poly;
+	}
+	return crc;
+}
+
+
+
+
 /* USER CODE END 0 */
 
 /**
@@ -98,6 +159,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  printf("About to start!\r\n");	// EP TEST
 
   hextir_main();
 

@@ -78,7 +78,7 @@ uint8_t int2bcd(uint8_t value);
 #define rtc_set(x)      do {} while(0)
 
 #ifdef STM32
-rtc_type_t rtc_get_type() { return RTC_TYPE_NONE; }
+static inline rtc_type_t rtc_get_type() { return RTC_TYPE_NONE; }
 #else
 #define rtc_get_type()  0
 #endif
