@@ -125,9 +125,50 @@ uint8_t crc7update(uint8_t crc, uint8_t data) {
 	}
 	return crc;
 }
+volatile int rxbuf_level = 0;
+uint8_t rxbuf[256];
+uint8_t txbuf[256];
+int txbuf_level = 0;
+uint32_t cdc_sent_bytes = 0;
 
+int erik_cdc_received_data(uint8_t *p, uint16_t len) {
+	if(len < sizeof(rxbuf) - rxbuf_level) {
+		memcpy(rxbuf+rxbuf_level, p, len);
+		rxbuf_level += len;
+		return len;
+	}
+	return 0;
+}
 
+/**
+ * @brief get_cdc_received_data should probably block interrupts from CDC
+ * before being run.
+ */
+int get_cdc_received_data(uint8_t *p, int len) {
+	int amount = MIN(rxbuf_level, len);
+	if(amount > 0) {
+		memcpy(p, rxbuf, amount);
+		if(rxbuf_level > amount) {
+			// in efficient - copy data in the buffer to the beginning
+			memcpy(rxbuf, rxbuf+amount, rxbuf_level-amount);
+		}
+		rxbuf_level -= amount;
+		return amount;
+	}
+	return 0;
+}
 
+int shift_data_in_tx_buffer(int amount) {
+	if(amount <= 0)
+		return 0;
+
+	if(txbuf_level >= amount) {
+		// in efficient - copy data in the buffer to the beginning
+		memcpy(txbuf, txbuf+amount, txbuf_level-amount);
+		txbuf_level -= amount;
+	}
+	return amount;
+}
 
 /* USER CODE END 0 */
 
@@ -190,6 +231,29 @@ int main(void)
 	  if(delays[index] < 0)
 		  index = 0;
 	  HAL_Delay(1000);
+
+	  int count = txbuf_level;
+	  if(count > 0) {
+		  if(CDC_Transmit_FS(txbuf, count) == USBD_OK) {
+			  shift_data_in_tx_buffer(count);
+			  cdc_sent_bytes += count;
+		  }
+	  }
+
+	  if(rxbuf_level > 0) {
+		  int level = 1; // rxbuf_level > 8 ? 8 : rxbuf_level;
+		  uint8_t b[8];
+		  get_cdc_received_data(b, level);
+		  for(int i=0; i<level; i++) {
+			  switch(b[i]) {
+			  case '0':	// Led off
+			  case '1': // led on  (write low level)
+				  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, !(b[i] == '1'));
+				  break;
+			  }
+		  }
+		  // print_debug_stuff( serial_index, b[0]);
+	  }
   }
 
 
