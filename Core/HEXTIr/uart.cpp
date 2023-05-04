@@ -29,7 +29,7 @@
 #include "config.h"
 #include "uart.h"
 
-#ifdef UART0_ENABLE
+#if defined UART0_ENABLE && !defined STM32
 #  if defined UART0_TX_BUFFER_SHIFT && UART0_TX_BUFFER_SHIFT > 0
 static uint8_t          tx0_buf[1 << UART0_TX_BUFFER_SHIFT];
 static volatile uint8_t tx0_tail;
@@ -42,7 +42,7 @@ static volatile uint8_t rx0_head;
 #  endif
 #endif
 
-#ifdef UART1_ENABLE
+#ifdef UART1_ENABLE && !defined STM32
 #  if defined UART1_TX_BUFFER_SHIFT && UART1_TX_BUFFER_SHIFT > 0
 static uint8_t          tx1_buf[1 << UART1_TX_BUFFER_SHIFT];
 static volatile uint8_t tx1_tail;
@@ -56,7 +56,7 @@ static volatile uint8_t rx1_tail;
 #endif
 
 /* UART0 Interrupt handlers */
-#if defined UART0_ENABLE
+#if defined UART0_ENABLE && !defined STM32
 #  if defined UART0_TX_BUFFER_SHIFT && UART0_TX_BUFFER_SHIFT > 0
 ISR(USARTA_UDRE_vect) {
   if ( tx0_head != tx0_tail ) {
@@ -310,7 +310,7 @@ void uart1_config(uint16_t rate, uartlen_t length, uartpar_t parity, uartstop_t 
 #  endif
 #endif
 
-#if defined UART0_ENABLE || defined UART1_ENABLE
+#if !defined STM32 && (defined UART0_ENABLE || defined UART1_ENABLE)
 /* Initialize UART */
 void uart_init(void) {
   /* Set the baud rate */

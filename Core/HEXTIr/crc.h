@@ -37,6 +37,8 @@ extern "C"{
 #include <util/crc16.h>
 
 uint8_t crc7update(uint8_t crc, uint8_t data);
+uint8_t crc7update2(uint8_t crc, uint8_t data);
+
 
 #define crc_xmodem_update(crc, data) _crc_xmodem_update(crc, data)
 #define crc16_update(crc, data) _crc16_update(crc, data)

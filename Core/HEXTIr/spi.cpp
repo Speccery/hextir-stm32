@@ -33,6 +33,9 @@
 #include "spi.h"
 
 #ifdef STM32
+#include "main.h"
+#include <memory.h>
+extern SPI_HandleTypeDef hspi2;
 
 void spi_set_divisor(const uint8_t div) {
 	// BUGBUG MISSING
@@ -54,8 +57,10 @@ void spi_init(spi_speed_t speed) {
 
 /* Simple and braindead, just like the AVR's SPI unit */
 static uint8_t spi_exchange_byte(uint8_t output) {
-	// BUGBUG MISSING
-	return 0;
+	uint8_t txbuf[4], rxbuf[4];
+	txbuf[0] = output;
+	HAL_SPI_TransmitReceive(&hspi2, txbuf, rxbuf, 1, 100);
+	return rxbuf[0];
 }
 
 void spi_tx_byte(uint8_t data) {
@@ -67,11 +72,19 @@ uint8_t spi_rx_byte(void) {
 }
 
 void spi_exchange_block(void *vdata, unsigned int length, uint8_t write) {
-	// BUGBUG MISSING
+	uint8_t rxbuf[16];
+	uint8_t *txbuf  = (uint8_t *)vdata;
+	while(length > 0) {
+		int block_size = length > 16 ? 16 : length;
+		HAL_SPI_TransmitReceive(&hspi2, txbuf, rxbuf, block_size, 1000);
+		memcpy(txbuf, rxbuf, block_size);	// Data is returned in the same buffer
+		txbuf += block_size;
+		length -= block_size;
+	}
 }
 
 void sdcard_set_ss(uint8_t state) {
-	// BUGBUG MISSING
+	HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, state == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
 }
 
 #else

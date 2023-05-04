@@ -24,6 +24,9 @@
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc_if.h"
 
+#include "../HEXTIr/config.h"
+#include "../HEXTIr/uart.h"	// HEXTir
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,6 +44,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+SPI_HandleTypeDef hspi1;
+SPI_HandleTypeDef hspi2;
+
 TIM_HandleTypeDef htim10;
 
 /* USER CODE BEGIN PV */
@@ -51,6 +57,8 @@ TIM_HandleTypeDef htim10;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM10_Init(void);
+static void MX_SPI1_Init(void);
+static void MX_SPI2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -123,8 +131,24 @@ uint8_t crc7update(uint8_t crc, uint8_t data) {
 		if(crc & 0x80)
 			crc ^= poly;
 	}
-	return crc;
+	return crc & 0x7F;
 }
+
+
+uint8_t crc7update2(uint8_t crc, uint8_t data)
+{
+	const uint8_t poly = 0x89;
+	uint8_t v = (crc << 1) ^ data;
+	v = (v & 0x80) ? v ^ poly : v;
+	for (int i = 1; i < 8; i++) {
+		v <<= 1;
+		if (v & 0x80)
+			v ^= poly;
+	}
+	return v;
+}
+
+
 volatile int rxbuf_level = 0;
 uint8_t rxbuf[256];
 uint8_t txbuf[256];
@@ -170,6 +194,32 @@ int shift_data_in_tx_buffer(int amount) {
 	return amount;
 }
 
+// HEXTIr debug UART stuff, forward to USB CDC
+void uart_init(void) {
+	// Nothing
+}
+
+void uart_putc(uint8_t c) {
+	if(txbuf_level < sizeof(txbuf)-1) {
+		txbuf[txbuf_level++] = c;
+	}
+	uart_data_tosend();
+}
+
+uint8_t uart_data_tosend(void) {
+
+	int count = txbuf_level;
+	if(count > 0) {
+	  if(CDC_Transmit_FS(txbuf, count) == USBD_OK) {
+		  shift_data_in_tx_buffer(count);
+		  cdc_sent_bytes += count;
+	  }
+	}
+	return count > 0;
+}
+
+
+
 /* USER CODE END 0 */
 
 /**
@@ -202,6 +252,8 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM10_Init();
   MX_USB_DEVICE_Init();
+  MX_SPI1_Init();
+  MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
   /* USER CODE END 2 */
@@ -217,7 +269,7 @@ int main(void)
   // 	Set: GPIOx->BSRR = GPIO_Pin;
   __IO uint32_t *pBSRR = &DEBUG_GPIO_Port->BSRR;
 
-  while (1) {
+  while (0) {
 	  char s[80];
 	  // HAL_GPIO_WritePin(DEBUG_GPIO_Port, DEBUG_Pin, GPIO_PIN_SET);
 	  *pBSRR = DEBUG_Pin;
@@ -256,6 +308,11 @@ int main(void)
 	  }
   }
 
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
+  HAL_Delay(3000);
+  char *s = "HEXTIr ported to STM32 by Erik Piehl 2023\r\n";
+  CDC_Transmit_FS((uint8_t *)s, strlen(s));
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
   hextir_main();
 
@@ -314,6 +371,82 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief SPI1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI1_Init(void)
+{
+
+  /* USER CODE BEGIN SPI1_Init 0 */
+
+  /* USER CODE END SPI1_Init 0 */
+
+  /* USER CODE BEGIN SPI1_Init 1 */
+
+  /* USER CODE END SPI1_Init 1 */
+  /* SPI1 parameter configuration*/
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_HARD_OUTPUT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI1_Init 2 */
+
+  /* USER CODE END SPI1_Init 2 */
+
+}
+
+/**
+  * @brief SPI2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI2_Init(void)
+{
+
+  /* USER CODE BEGIN SPI2_Init 0 */
+
+  /* USER CODE END SPI2_Init 0 */
+
+  /* USER CODE BEGIN SPI2_Init 1 */
+
+  /* USER CODE END SPI2_Init 1 */
+  /* SPI2 parameter configuration*/
+  hspi2.Instance = SPI2;
+  hspi2.Init.Mode = SPI_MODE_MASTER;
+  hspi2.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi2.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi2.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi2.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi2.Init.NSS = SPI_NSS_SOFT;
+  hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi2.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi2.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi2.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI2_Init 2 */
+
+  /* USER CODE END SPI2_Init 2 */
+
+}
+
+/**
   * @brief TIM10 Initialization Function
   * @param None
   * @retval None
@@ -366,8 +499,8 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(DEBUG_GPIO_Port, DEBUG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DB_D1_Pin|DB_D0_Pin|DB_D2_Pin|DB_D3_Pin
-                          |DB_HSK_Pin|DB_BAV_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, SD_CS_Pin|DB_D1_Pin|DB_D0_Pin|DB_D2_Pin
+                          |DB_D3_Pin|DB_HSK_Pin|DB_BAV_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -382,12 +515,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(KEY_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : DEBUG_Pin */
-  GPIO_InitStruct.Pin = DEBUG_Pin;
+  /*Configure GPIO pins : DEBUG_Pin SD_CS_Pin */
+  GPIO_InitStruct.Pin = DEBUG_Pin|SD_CS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DEBUG_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DB_D1_Pin DB_D0_Pin DB_D2_Pin DB_D3_Pin
                            DB_HSK_Pin DB_BAV_Pin */

@@ -424,8 +424,13 @@ static inline void wakeup_pin_init(void) {
 // #define INCLUDE_CLOCK
 // #define INCLUDE_SERIAL
 #define INCLUDE_PRINTER
+#define CONFIG_UART_DEBUG	// Actually over USB
+#define CONFIG_UART0_ENABLE
 
 #define CONFIG_SD_BLOCKTRANSFER
+#define HAVE_SD
+
+#define CONFIG_HARDWARE_NAME HEXTIr (STM32 Black Pill)
 
 static inline void board_init(void) {
 	// BUGBUG MISSING

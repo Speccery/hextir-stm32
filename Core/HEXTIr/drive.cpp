@@ -649,6 +649,10 @@ static void drv_start(void) {
   if (!fs_initialized) {
     if (f_mount(1, &fs) == FR_OK) {
       fs_initialized = TRUE;
+    } else {
+#ifdef STM32      
+    	debug_puts("f_mount failed!\r\n");
+#endif      
     }
   }
 }
@@ -748,8 +752,14 @@ static void drv_open(pab_t *pab) {
       }
     } else { // too many open files, or file system maybe not initialized?
       rc = HEXSTAT_MAX_LUNS;
+#ifdef STM32      
+      debug_puts("HEXSTAT_MAX_LUNS\r\n");
+#endif      
       if ( !fs_initialized ) {
         rc = HEXSTAT_DEVICE_ERR;
+#ifdef STM32      
+        debug_puts("HEXSTAT_DEVICE_ERR\r\n");
+#endif        
       }
     }
   }

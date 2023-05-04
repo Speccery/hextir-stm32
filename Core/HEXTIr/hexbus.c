@@ -247,10 +247,11 @@ lowhsk:  // Host has driven HSK low. Peripheral side must now hold it low.
 
   // Read lower 4 bits of incoming data.
 #ifdef STM32
+  _delay_us(2);	// EP slow down us a bit
   lsn  = HAL_GPIO_ReadPin(DB_D3_GPIO_Port, DB_D3_Pin) ? 8 : 0;
-  lsn |= HAL_GPIO_ReadPin(DB_D2_GPIO_Port, DB_D3_Pin) ? 4 : 0;
-  lsn |= HAL_GPIO_ReadPin(DB_D1_GPIO_Port, DB_D3_Pin) ? 2 : 0;
-  lsn |= HAL_GPIO_ReadPin(DB_D0_GPIO_Port, DB_D3_Pin) ? 1 : 0;
+  lsn |= HAL_GPIO_ReadPin(DB_D2_GPIO_Port, DB_D2_Pin) ? 4 : 0;
+  lsn |= HAL_GPIO_ReadPin(DB_D1_GPIO_Port, DB_D1_Pin) ? 2 : 0;
+  lsn |= HAL_GPIO_ReadPin(DB_D0_GPIO_Port, DB_D0_Pin) ? 1 : 0;
 #else
   lsn = (HEX_DATA_IN & HEX_DATA_PIN);
 #endif
@@ -270,10 +271,11 @@ lowhsk:  // Host has driven HSK low. Peripheral side must now hold it low.
   hex_hsk_lo();
   // read data nibble for upper 4 bits of data.
 #ifdef STM32
+  _delay_us(2);	// EP slow down us a bit
   msn  = HAL_GPIO_ReadPin(DB_D3_GPIO_Port, DB_D3_Pin) ? 8 : 0;
-  msn |= HAL_GPIO_ReadPin(DB_D2_GPIO_Port, DB_D3_Pin) ? 4 : 0;
-  msn |= HAL_GPIO_ReadPin(DB_D1_GPIO_Port, DB_D3_Pin) ? 2 : 0;
-  msn |= HAL_GPIO_ReadPin(DB_D0_GPIO_Port, DB_D3_Pin) ? 1 : 0;
+  msn |= HAL_GPIO_ReadPin(DB_D2_GPIO_Port, DB_D2_Pin) ? 4 : 0;
+  msn |= HAL_GPIO_ReadPin(DB_D1_GPIO_Port, DB_D1_Pin) ? 2 : 0;
+  msn |= HAL_GPIO_ReadPin(DB_D0_GPIO_Port, DB_D0_Pin) ? 1 : 0;
 #else
   msn = (HEX_DATA_IN & HEX_DATA_PIN); // MSN
 #endif
@@ -288,9 +290,9 @@ lowhsk:  // Host has driven HSK low. Peripheral side must now hold it low.
 #ifdef STM32
 static inline drive_nibble_bus(uint8_t nibble) {
   HAL_GPIO_WritePin(DB_D3_GPIO_Port, DB_D3_Pin, nibble & 8);
-  HAL_GPIO_WritePin(DB_D2_GPIO_Port, DB_D3_Pin, nibble & 4);
-  HAL_GPIO_WritePin(DB_D1_GPIO_Port, DB_D3_Pin, nibble & 2);
-  HAL_GPIO_WritePin(DB_D0_GPIO_Port, DB_D3_Pin, nibble & 1);
+  HAL_GPIO_WritePin(DB_D2_GPIO_Port, DB_D2_Pin, nibble & 4);
+  HAL_GPIO_WritePin(DB_D1_GPIO_Port, DB_D1_Pin, nibble & 2);
+  HAL_GPIO_WritePin(DB_D0_GPIO_Port, DB_D0_Pin, nibble & 1);
 }
 #endif
 

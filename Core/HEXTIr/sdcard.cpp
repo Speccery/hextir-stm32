@@ -242,12 +242,21 @@ static uint8_t send_command(const uint8_t  card,
 
   /* calculate CRC for command+parameter */
   convert.val32 = parameter;
+/*
   crc = crc7update(0,   cmd);
   crc = crc7update(crc, convert.val8[3]);
   crc = crc7update(crc, convert.val8[2]);
   crc = crc7update(crc, convert.val8[1]);
   crc = crc7update(crc, convert.val8[0]);
   crc = (crc << 1) | 1;
+*/
+
+  uint8_t crc2 = crc7update2(0, cmd);
+  crc2 = crc7update2(crc2, convert.val8[3]);
+  crc2 = crc7update2(crc2, convert.val8[2]);
+  crc2 = crc7update2(crc2, convert.val8[1]);
+  crc2 = crc7update2(crc2, convert.val8[0]);
+  crc2 = (crc2 << 1) | 1;
 
   errors = 0;
   while (errors < CONFIG_SD_AUTO_RETRIES) {
@@ -259,7 +268,7 @@ static uint8_t send_command(const uint8_t  card,
     spi_tx_byte(cmd);
     tmp = swap_word(parameter); // AVR spi_tx_block clobbers the buffer
     spi_tx_block(&tmp, 4);
-    spi_tx_byte(crc);
+    spi_tx_byte(crc2);
 
     /* wait up to 500ms for a valid response */
     timeout = getticks() + HZ/2;

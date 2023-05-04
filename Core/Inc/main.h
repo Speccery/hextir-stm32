@@ -65,6 +65,8 @@ void timer_init();
 #define KEY_GPIO_Port GPIOA
 #define DEBUG_Pin GPIO_PIN_10
 #define DEBUG_GPIO_Port GPIOB
+#define SD_CS_Pin GPIO_PIN_12
+#define SD_CS_GPIO_Port GPIOB
 #define DB_D1_Pin GPIO_PIN_3
 #define DB_D1_GPIO_Port GPIOB
 #define DB_D0_Pin GPIO_PIN_4

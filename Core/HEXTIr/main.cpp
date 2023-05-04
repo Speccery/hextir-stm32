@@ -95,7 +95,11 @@ static void execute_command(pab_t *pab) {
         // found it!
         j--;  // here's the cmd index
         // fetch the handler for this command for this device group.
+#ifdef STM32
+        handler = op[j].operation;
+#else
         handler = (cmd_proc)pgm_read_word( &op[j].operation );
+#endif
         (handler)( pab );
         // and exit the command processor
         return;
@@ -156,6 +160,39 @@ void setup(void) {
   prn_init();
 
   wakeup_pin_init();
+
+#if 0
+  // #ifdef STM32
+  // Make a directory listing to test SD card access.
+  {
+	drv_reset();
+
+    extern FATFS fs;
+
+    char *directory = "/";
+
+    DIR dir;
+    FILINFO fno;
+  # ifdef _MAX_LFN_LENGTH
+    UCHAR lfn[_MAX_LFN_LENGTH + 1];
+    fno.lfn = lfn;
+  #endif
+    FRESULT res;
+    uint16_t count = 0;
+    char* filename = NULL;
+
+    res = f_opendir(&fs, &dir, (UCHAR*)directory); // open the directory
+    while (res == FR_OK) {
+      res = f_readdir(&dir, &fno);                   // read a directory item
+      if (res != FR_OK || fno.fname[0] == 0)
+        break;  // break on error or end of dir
+      filename = (char*)(fno.lfn[0] != 0 ? fno.lfn : fno.fname );
+      debug_puts(filename);
+      debug_putcrlf();
+      count++;
+    }
+  }
+  #endif
 }
 
 
@@ -194,6 +231,8 @@ extern "C" int hextir_main(void) {
 
     set_busy_led( FALSE );
 
+    debug_puts_P("Wait for BAV low\r\n");
+
     while (hex_is_bav()) {
       // sleep until BAV falls. If low, HSK will be low.(if power management enabled, if not this is nop)
       if(rtc_type != RTC_TYPE_SW) {  // can't sleep if RTC is SW
@@ -205,6 +244,10 @@ extern "C" int hextir_main(void) {
           pwr_sleep(SLEEP_STANDBY);
         }
       }
+#ifdef STM32
+      // For STM32 for now USB CDC use in polling mode.
+      uart_data_tosend();
+#endif
     }
 
 #ifdef INCLUDE_POWERMGMT
@@ -273,12 +316,32 @@ extern "C" int hextir_main(void) {
           if ( pabdata.pab.dev == 0 && pabdata.pab.cmd != HEXCMD_RESET_BUS ) {
             pabdata.pab.cmd = HEXCMD_NULL; // change out to NULL operation and let bus float.
           }
-          execute_command( &(pabdata.pab) );
+#ifdef STM32
+          // Manually fix the PAB for us. The alignment with STM32 is different.
+          pab_raw_t pabdata2;
+          pabdata2.pab.dev 		= pabdata.pab.dev;
+          pabdata2.pab.cmd 		= pabdata.pab.cmd;
+          pabdata2.pab.lun 		= pabdata.pab.lun;
+          pabdata2.pab.record = pabdata.raw[3] + (pabdata.raw[4] << 8);
+          pabdata2.pab.buflen = pabdata.raw[5] + (pabdata.raw[6] << 8);
+          pabdata2.pab.datalen = pabdata.raw[7] + (pabdata.raw[8] << 8);
+#endif
+          execute_command( &(pabdata2.pab) );
           ignore_cmd = TRUE;  // in case someone sends more data, ignore it.
         }
       } else {
         debug_putc('%');
+#ifdef STM32        
+        char s[80];
+        sprintf(s, "%d: ", i);
+        debug_puts(s);
+        for(int j=0; j<i; j++) {
+        	debug_puthex(pabdata.raw[j]);
+        	debug_putc(' ');
+        }
+#else
         debug_puthex(pabdata.raw[0]);
+#endif        
         i = 0;
         hex_release_bus();
         while (!hex_is_bav() )  // wait for BAV back high, ignore any traffic

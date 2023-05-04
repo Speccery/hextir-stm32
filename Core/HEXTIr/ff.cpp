@@ -60,6 +60,11 @@
 #include "diskio.h"     /* Include file for user provided disk functions */
 #include <avr/pgmspace.h>
 
+#ifdef STM32
+#include "debug.h"
+#include <stdio.h>
+#endif
+
 /*--------------------------------------------------------------------------
 
    Module Private Functions
@@ -702,7 +707,14 @@ FRESULT trace_path (     /* FR_OK(0): successful, !=0: error code */
             l=0;
             match=TRUE;
           } else {
-            /* No LFN to match against */
+#ifdef STM32
+        	  // total hack, if byte 7 of the filename is 08, make it a space...
+        	  if(dptr[DIR_Name+7] == 8)
+        		  dptr[DIR_Name+7] = 0x20;
+#endif
+
+
+        	/* No LFN to match against */
             if (dptr[DIR_Name] != 0xE5            /* Matched? */
                 && !(dptr[DIR_Attr] & AM_VOL)
                 && !memcmp(&dptr[DIR_Name], fn, 8+3) ) {
@@ -1440,6 +1452,16 @@ FRESULT f_open (
 #else
   res = trace_path(&dj, fn, path, &dir);   /* Trace the file path */
 #endif
+
+#ifdef STM32
+  {
+	  char s[80];
+	  sprintf(s, "trace_path returned %d (0 would be ok)\r\n", res);
+	  debug_puts(s);
+  }
+#endif
+
+
 #if !_FS_READONLY
   /* Create or Open a file */
 # if _USE_CHDIR != 0

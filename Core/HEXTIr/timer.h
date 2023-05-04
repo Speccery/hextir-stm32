@@ -43,9 +43,6 @@ extern "C"{
 typedef uint16_t tick_t;
 typedef int16_t stick_t;
 
-#define HZ 100
-
-#define MS_TO_TICKS(x) (x/10)
 
 #define time_after(a,b)         \
          ((stick_t)(b) - (stick_t)(a) < 0)
@@ -54,6 +51,12 @@ typedef int16_t stick_t;
 
 
 #ifdef STM32
+#include "main.h"
+
+#define HZ (1000/HAL_GetTickFreq())
+#define MS_TO_TICKS(x) (1000/HZ)
+
+
 
 static void start_timeout(uint16_t usecs) {
 	// BUGBUG MISSING
@@ -65,15 +68,20 @@ static  uint8_t has_timed_out(void) {
 }
 
 static  tick_t getticks(void) {
-	// BUGBUG MISSING
-	// return 100 Hz ticks
-	return 0;
+	uint32_t hz = HZ;		// for debugging.
+	uint32_t ticks = HAL_GetTick();
+	return ticks;
 }
 
 void timer_init();	// declared in main.c for STM32
 
 
 #else
+
+#define HZ 100
+
+#define MS_TO_TICKS(x) (x/10)
+
 
 /**
  * start_timeout - start a timeout using timer0

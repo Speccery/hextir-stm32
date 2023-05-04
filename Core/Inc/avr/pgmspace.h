@@ -29,12 +29,14 @@ typedef uint32_t prog_uint32_t;
 #define sprintf_P(s, f, ...) sprintf((s), (f), __VA_ARGS__)
 
 #define pgm_read_byte(addr) (*(const unsigned char *)(addr))
-#define pgm_read_word(addr) (*(const unsigned short *)(addr))
+// EP don't support reading words as the may be pointers which confuse
+// everything since pointers on STM32 are 32-bit.
+// #define pgm_read_word(addr) (*(const unsigned short *)(addr))
 #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #define pgm_read_float(addr) (*(const float *)(addr))
 
 #define pgm_read_byte_near(addr) pgm_read_byte(addr)
-#define pgm_read_word_near(addr) pgm_read_word(addr)
+// #define pgm_read_word_near(addr) pgm_read_word(addr)
 #define pgm_read_dword_near(addr) pgm_read_dword(addr)
 #define pgm_read_float_near(addr) pgm_read_float(addr)
 #define pgm_read_byte_far(addr) pgm_read_byte(addr)

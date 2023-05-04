@@ -212,9 +212,16 @@ extern "C"{
 #  define UPMA0  UPM0
 #  define UPMA1  UPM1
 
+
+#elif defined STM32
+
+// We go with STM32
+
 #else
 #  error Unknown chip!
 #endif
+
+#ifndef STM32
 
 #if defined __AVR_ATmega8__ || defined __AVR_ATmega16__ || defined __AVR_ATmega32__  || defined __AVR_ATmega162__
 #  define UART0_CONFIG(l,p,s) do{\
@@ -305,7 +312,11 @@ void uart1_config(uint16_t rate, uartlen_t length, uartpar_t parity, uartstop_t 
 
 #endif
 
+
 #include <avr/pgmspace.h>
+
+#endif // STM32
+
 void uart_init(void);
 uint8_t uart_getc(void);
 void uart_putc(uint8_t c);
@@ -319,6 +330,12 @@ uint8_t uart_data_available(void);
 void uart_putcrlf(void);
 
 #else
+
+#ifdef STM32
+# 	error With STM32 we should not come here!
+#else
+#	error STM32 not defined?
+#endif
 #define uart_init()             do {} while(0)
 #define uart_getc()             0
 #define uart_putc(x)            do {} while(0)
@@ -344,6 +361,9 @@ void uart0_putcrlf(void);
 #  include <stdio.h>
 #  define dprintf(str,...) printf_P(PSTR(str), ##__VA_ARGS__)
 #else
+#ifdef STM32
+# 	error With STM32 we should not come here!
+#endif
 #  define uart0_getc()           0
 #  define uart0_putc(x)          do {} while(0)
 #  define uart0_puthex(x)        do {} while(0)

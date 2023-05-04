@@ -32,7 +32,7 @@ config_t _config;
 
 
 #ifdef STM32
-uint8_t eeprom_storage[512];	// our "eeprom"
+uint8_t eeprom_storage[512] = { 1, 2, 3, 4 };	// our "eeprom" with random data.
 
 uint8_t eeprom_read_byte (const uint8_t *__p) {
 	int offset = __p - (const uint8_t *)&_eeconfig;
