@@ -11,7 +11,7 @@ The target board is the so-called Black Pill, with a STM32F411CEU chip. This is 
 ## License of the STM32 derived work
 Licenses as in the original project, except for the STM32 libraries and generated code which are distributed with their respective licenses. Not sure if all the license text is included in this repository yet.
 
-## Description
+## Description (original not STM32)
 Coupled with an Atmel ATMEGA328 microcontroller (either as a standalone PCB or an 
 Arduino UNO, Nano, etc. development board), this firmware implements the functionality
 of the various HEXBUS peripherals:
