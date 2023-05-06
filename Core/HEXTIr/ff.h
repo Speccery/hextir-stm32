@@ -89,12 +89,20 @@
 /  requirements as open files will only require space for a FIL object, but
 /  operate slower. When set, ff.c will behave like tff.c, but will allow
 /  multiple filesystems.  */
+#ifdef STM32
+#define _USE_FS_BUF 1 // 0
+#else
 #define _USE_FS_BUF 1
+#endif
 
 /* When set to 1, All objects will use a static  buffer.  This reduces memory
 /  requirements to the absolute minimum ~512 bytes for the buffer, but will
 /  operate slower.  This option can only be set if _USE_FS_BUF is set.  */
+#ifdef STM32
+#define _USE_1_BUF 1 // 0
+#else
 #define _USE_1_BUF 1
+#endif
 
 /* If set to 1, FatFs will manage the FATFS structures after mounting.  If
 /  set to 0, the caller must send the correct drive FATFS structure for each

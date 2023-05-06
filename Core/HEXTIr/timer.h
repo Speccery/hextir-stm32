@@ -58,20 +58,9 @@ typedef int16_t stick_t;
 
 
 
-static void start_timeout(uint16_t usecs) {
-	// BUGBUG MISSING
-}
-
-static  uint8_t has_timed_out(void) {
-	// BUGBUG MISSING
-	return 0;
-}
-
-static  tick_t getticks(void) {
-	uint32_t hz = HZ;		// for debugging.
-	uint32_t ticks = HAL_GetTick();
-	return ticks;
-}
+void start_timeout(uint16_t usecs);
+uint8_t has_timed_out(void);
+tick_t getticks(void);
 
 void timer_init();	// declared in main.c for STM32
 

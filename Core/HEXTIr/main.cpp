@@ -207,6 +207,7 @@ extern "C" int hextir_main(void) {
   // Variables used common to both Arduino and makefile builds
   uint8_t i = 0;
   uint8_t ignore_cmd = FALSE;
+  uint8_t cmd_processed = FALSE;		// EP Added this BUGBUG
   pab_raw_t pabdata;
   hexerror_t res;
   rtc_type_t rtc_type;
@@ -293,6 +294,12 @@ extern "C" int hextir_main(void) {
         if ( res == HEXERR_SUCCESS ) {
           i++;
         } else {
+#ifdef STM32
+        	char s[80];
+        	sprintf(s, "Ignoring HEXBUS cmd, %d.\r\n", res);
+        	debug_puts(s);
+#endif
+
           ignore_cmd = TRUE;
           i = 9;
           hex_release_bus();
@@ -300,6 +307,7 @@ extern "C" int hextir_main(void) {
       }
 
       if ( !ignore_cmd ) {
+        cmd_processed = FALSE;
         ignore_cmd = TRUE;
         for (uint8_t j = 0; j < registry.num_devices; j++) {
           if(registry.entry[j].dev_cur == pabdata.pab.dev) {
@@ -328,18 +336,21 @@ extern "C" int hextir_main(void) {
 #endif
           execute_command( &(pabdata2.pab) );
           ignore_cmd = TRUE;  // in case someone sends more data, ignore it.
+          cmd_processed = TRUE;
         }
       } else {
-        debug_putc('%');
 #ifdef STM32        
-        char s[80];
-        sprintf(s, "%d: ", i);
-        debug_puts(s);
-        for(int j=0; j<i; j++) {
-        	debug_puthex(pabdata.raw[j]);
-        	debug_putc(' ');
-        }
+    	if(!cmd_processed) {
+			char s[80];
+			sprintf(s, "Ignore %d: ", i);
+			debug_puts(s);
+			for(int j=0; j<i; j++) {
+				debug_puthex(pabdata.raw[j]);
+				debug_putc(' ');
+			}
+    	}
 #else
+        debug_putc('%');
         debug_puthex(pabdata.raw[0]);
 #endif        
         i = 0;

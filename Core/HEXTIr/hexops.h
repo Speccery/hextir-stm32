@@ -43,6 +43,16 @@ typedef struct _action_t {
 /*
     PAB (Peripheral Access Block) data structure
 */
+#ifdef STM32
+typedef struct _pab_t {
+  uint8_t dev;
+  uint8_t cmd;
+  uint8_t lun;
+  uint16_t __attribute__((packed)) record;
+  uint16_t __attribute__((packed)) buflen;
+  uint16_t __attribute__((packed)) datalen;
+} pab_t;
+#else
 typedef struct _pab_t {
   uint8_t dev;
   uint8_t cmd;
@@ -51,6 +61,7 @@ typedef struct _pab_t {
   uint16_t buflen;
   uint16_t datalen;
 } pab_t;
+#endif
 
 typedef struct _pab_raw_t {
   union {

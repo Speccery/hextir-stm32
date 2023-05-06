@@ -1,6 +1,4 @@
-Drivers
 .DS_Store
 Debug
-Middlewares
 Release
-USB_DEVICE
+sdcard

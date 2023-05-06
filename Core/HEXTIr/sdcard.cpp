@@ -40,6 +40,10 @@
 #include "timer.h"
 #include "sdcard.h"
 
+#ifdef STM32
+#include <stdio.h>
+#endif
+
 #ifdef CONFIG_TWINSD
 #  define MAX_CARDS 2
 #else
@@ -230,7 +234,8 @@ static uint8_t send_command(const uint8_t  card,
                             const uint8_t  cmd,
                             const uint32_t parameter) {
   tick_t   timeout;
-  uint8_t  crc, errors, res;
+//  uint8_t  crc;
+  uint8_t  errors, res;
   uint32_t tmp;
 
   // FIXME: Only works on little-endian
@@ -350,6 +355,14 @@ DSTATUS sd_initialize(BYTE drv) {
   uint16_t tries = 3;
   uint8_t  i,res;
   tick_t   timeout;
+
+
+#ifdef STM32
+  char s[80];
+  sprintf(s, "sd_initialize: drv=%d\r\n", drv);
+  debug_puts(s);
+#endif
+
 
   if (drv >= MAX_CARDS)
     return STA_NOINIT | STA_NODISK;
@@ -500,6 +513,12 @@ DRESULT sd_read(BYTE drv, BYTE *buffer, DWORD sector, BYTE count) {
   uint8_t  res, sec, errors;
   uint16_t crc, recvcrc;
 
+#ifdef STM32
+  char s[80];
+  sprintf(s, "sd_read: drv=%d sector=%lu count=%d. ", drv, sector, count);
+  debug_puts(s);
+#endif
+
   if (drv >= MAX_CARDS)
     return RES_PARERR;
 
@@ -520,6 +539,9 @@ DRESULT sd_read(BYTE drv, BYTE *buffer, DWORD sector, BYTE count) {
       if (res != 0) {
         deselect_card();
         disk_state = DISK_ERROR;
+#ifdef STM32
+        debug_puts("sd_read: DISK_ERROR 1\r\n");
+#endif
         return RES_ERROR;
       }
 
@@ -527,6 +549,9 @@ DRESULT sd_read(BYTE drv, BYTE *buffer, DWORD sector, BYTE count) {
       if (!expect_byte(0xfe)) {
         deselect_card();
         disk_state = DISK_ERROR;
+#ifdef STM32
+        debug_puts("sd_read: DISK_ERROR 2\r\n");
+#endif
         return RES_ERROR;
       }
 
@@ -576,12 +601,20 @@ DRESULT sd_read(BYTE drv, BYTE *buffer, DWORD sector, BYTE count) {
     }
     deselect_card();
 
-    if (errors >= CONFIG_SD_AUTO_RETRIES)
+    if (errors >= CONFIG_SD_AUTO_RETRIES) {
+#ifdef STM32
+        debug_puts("sd_read: DISK_ERROR 3\r\n");
+#endif
+
       return RES_ERROR;
+    }
 
     buffer += 512;
   }
 
+#ifdef STM32
+        debug_puts("sd_read: OK\r\n");
+#endif
   return RES_OK;
 }
 DRESULT disk_read(BYTE drv, BYTE *buffer, DWORD sector, BYTE count) __attribute__ ((weak, alias("sd_read")));
@@ -605,12 +638,29 @@ DRESULT sd_write(BYTE drv, const BYTE *buffer, DWORD sector, BYTE count) {
   uint8_t  res, sec, errors;
   uint16_t crc;
 
-  if (drv >= MAX_CARDS)
+#ifdef STM32
+  char s[80];
+  sprintf(s, "sd_write: drv=%d sector=%lu count=%d. ", drv, sector,count);
+  debug_puts(s);
+#endif
+
+
+  if (drv >= MAX_CARDS) {
+#ifdef STM32
+        debug_puts("sd_write: DISK_ERROR 1\r\n");
+#endif
+
     return RES_PARERR;
+  }
 
   /* check write protect */
-  if (sd_wrprot(drv))
+  if (sd_wrprot(drv)) {
+#ifdef STM32
+        debug_puts("sd_write: DISK_ERROR 2\r\n");
+#endif
+
     return RES_WRPRT;
+  }
 
   /* convert sector number to byte offset for non-SDHC cards */
   if (cardtype[drv] == CARD_MMCSD)
@@ -629,6 +679,9 @@ DRESULT sd_write(BYTE drv, const BYTE *buffer, DWORD sector, BYTE count) {
       if (res != 0) {
         deselect_card();
         disk_state = DISK_ERROR;
+#ifdef STM32
+        debug_puts("sd_write: DISK_ERROR 3\r\n");
+#endif
         return RES_ERROR;
       }
 
@@ -679,11 +732,17 @@ DRESULT sd_write(BYTE drv, const BYTE *buffer, DWORD sector, BYTE count) {
     deselect_card();
 
     if (errors >= CONFIG_SD_AUTO_RETRIES) {
+#ifdef STM32
+        debug_puts("sd_write: DISK_ERROR 4\r\n");
+#endif
       return RES_ERROR;
     }
 
     buffer += 512;
   }
+#ifdef STM32
+  debug_puts("sd_write: OK\r\n");
+#endif
 
   return RES_OK;
 }

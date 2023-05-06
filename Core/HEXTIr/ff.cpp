@@ -111,7 +111,8 @@ BOOL move_window (      /* TRUE: successful, FALSE: failed */
 #if _USE_1_BUF != 0
   FATFS* ofs = buf->fs;
 #else
-#define ofs fs
+  FATFS *ofs = fs;		// EPEP fixed this bug (won't compile for STM32)
+// #define ofs fs
 #endif
 
 

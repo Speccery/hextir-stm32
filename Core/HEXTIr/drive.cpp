@@ -44,6 +44,10 @@
 #include "timer.h"
 #include "drive.h"
 
+#ifdef STM32
+#include <stdio.h>
+#endif
+
 #ifdef INCLUDE_DRIVE
 
 FATFS fs;
@@ -420,6 +424,20 @@ static void drv_write(pab_t *pab) {
   FRESULT res = FR_OK;
   
   debug_puts_P("Write File\r\n");
+#ifdef STM32
+//  typedef struct _pab_t {
+//    uint8_t dev;
+//    uint8_t cmd;
+//    uint8_t lun;
+//    uint16_t __attribute__((packed)) record;
+//    uint16_t __attribute__((packed)) buflen;
+//    uint16_t __attribute__((packed)) datalen;
+//  } pab_t;
+  char s[80];
+  sprintf(s, "drv_write: dev=%d cmd=%d lun=%d record=%d buflen=%d datalen=%d\r\n",
+		  pab->dev, pab->cmd, pab->lun, pab->buflen, pab->datalen, pab->record);
+  debug_puts(s);
+#endif
 
   len = pab->datalen;
   if (pab->lun == _cmd_lun
@@ -459,6 +477,13 @@ static void drv_write(pab_t *pab) {
     if (file != NULL && res == FR_OK && rc == HEXSTAT_SUCCESS) {
 
       res = f_write(&(file->fp), buffer, i, &written);
+#ifdef STM32
+      if(res != FR_OK) {
+    	  char s[80];
+    	  sprintf(s, "f_write failed. written=%d len=%d res=%d\r\n", written, i, res);
+    	  debug_puts(s);
+      }
+#endif
       if ( written != i ) {
         res = FR_DENIED;
       }
@@ -583,15 +608,28 @@ static void drv_read(pab_t *pab) {
         fsize = file->fp.fsize - (uint16_t)file->fp.fptr;
       // send how much we are going to send
       rc = (hex_send_word( fsize ) == HEXERR_SUCCESS ? HEXSTAT_SUCCESS : HEXSTAT_DATA_ERR);
+
+#ifdef STM32
+      char s[80];
+      sprintf(s, "drv_read: sent fsize %d, rc=%d\r\n", fsize, rc);
+      debug_puts(s);
+#endif
+
+
       len = 1; // send data immediately byte by byte to avoid time-out errors
       // while we have data remaining to send.
       while ( fsize && rc == HEXSTAT_SUCCESS && res == FR_OK) {
-        /*
-        len = fsize;    // remaining amount to read from file
+#ifdef STM32
+    	// EPEP Let's see if we can run this with STM32.
+    	// The problem probably is that on the Arduino we don't have enough memory
+    	// for proper SD card sector buffers.
+
+    	len = fsize;    // remaining amount to read from file
         // will it fit into buffer or not?  Only read as much
         // as we can hold in our buffer.
         len = ( len > BUFSIZE ) ? BUFSIZE : len;
-        */
+#endif
+
         res = f_read(&(file->fp), buffer, len, &read);
         if (!res) {
           debug_trace(buffer, 0, read);

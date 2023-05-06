@@ -134,17 +134,12 @@ void spi_tx_byte(uint8_t data);
 void spi_exchange_block(void *data, unsigned int length, uint8_t write);
 
 /* Receive a data block */
-static inline void spi_tx_block(const void *data, unsigned int length) {
-  spi_exchange_block((void *)data, length, 0);
-}
-
+void spi_tx_block(const void *data, unsigned int length);
 /* Receive a single byte */
 uint8_t spi_rx_byte(void);
 
 /* Receive a data block */
-static inline void spi_rx_block(void *data, unsigned int length) {
-  spi_exchange_block(data, length, 1);
-}
+void spi_rx_block(void *data, unsigned int length);
 
 /* Switch speed of SPI interface */
 void spi_set_speed(spi_speed_t speed);

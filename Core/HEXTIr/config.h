@@ -432,26 +432,19 @@ static inline void wakeup_pin_init(void) {
 
 #define CONFIG_HARDWARE_NAME HEXTIr (STM32 Black Pill)
 
-static inline void board_init(void) {
-	// BUGBUG MISSING
-}
+#ifdef __cplusplus
+extern "C"{
+#endif
 
-static void sei() {
-	// BUGBUG MISSING
+void board_init(void);
+void sei();
+uint8_t sdcard_wp(void);
+void sdcard_interface_init(void);
+uint8_t sdcard_detect(void);
 
+#ifdef __cplusplus
 }
-
-static inline uint8_t sdcard_wp(void) {
-  return 0;
-}
-
-static void sdcard_interface_init(void) {
-	// BUGBUG MISSING
-}
-
-static uint8_t sdcard_detect(void) {
-	return 1;
-}
+#endif
 
 #    define CONFIG_SD_AUTO_RETRIES 10
 
@@ -467,13 +460,16 @@ static uint8_t sdcard_detect(void) {
 
 #ifdef STM32
 
-static void leds_init(void) {
-	// BUGBUG MISSING
-}
+#ifdef __cplusplus
+extern "C"{
+#endif
 
-static void wakeup_pin_init(void) {
-	// BUGBUG MISSING
+void leds_init(void);
+void wakeup_pin_init(void);
+
+#ifdef __cplusplus
 }
+#endif
 
 
 #else

@@ -71,17 +71,45 @@ uint8_t spi_rx_byte(void) {
   return spi_exchange_byte(0xff);
 }
 
+/**
+ * From original sources:
+ * write = 0: write data from vdata. Discard returned data!
+ * write = 1: send 0xFF bytes. Store returned data to buffer.
+ * Thus the meaning of write seems to be inverted, i.e. active zero.
+ */
 void spi_exchange_block(void *vdata, unsigned int length, uint8_t write) {
 	uint8_t rxbuf[16];
+	uint8_t buf_ff[16];
+	memset(buf_ff, 0xff, sizeof(buf_ff));	// Fill buf_ff with 0xFF
 	uint8_t *txbuf  = (uint8_t *)vdata;
 	while(length > 0) {
 		int block_size = length > 16 ? 16 : length;
-		HAL_SPI_TransmitReceive(&hspi2, txbuf, rxbuf, block_size, 1000);
-		memcpy(txbuf, rxbuf, block_size);	// Data is returned in the same buffer
+		if(!write) {
+			HAL_SPI_TransmitReceive(&hspi2, txbuf, rxbuf, block_size, 1000);
+			// discard data written to rxbuf
+		} else {
+			// Notice that below we transmit from buf_ff and store returned data to txbuf i.e. the input buffer.
+			// Thus thus is a read operation.
+			HAL_SPI_TransmitReceive(&hspi2, buf_ff, txbuf, block_size, 1000);
+		}
 		txbuf += block_size;
 		length -= block_size;
 	}
 }
+
+/* Receive a data block */
+void spi_tx_block(const void *data, unsigned int length) {
+  spi_exchange_block((void *)data, length, 0);
+}
+
+/* Receive a single byte */
+uint8_t spi_rx_byte(void);
+
+/* Receive a data block */
+void spi_rx_block(void *data, unsigned int length) {
+  spi_exchange_block(data, length, 1);
+}
+
 
 void sdcard_set_ss(uint8_t state) {
 	HAL_GPIO_WritePin(SD_CS_GPIO_Port, SD_CS_Pin, state == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
