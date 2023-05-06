@@ -8,6 +8,34 @@ Started by creating a fresh STM32 project with STM32CubeIDE. Copied in the sourc
 
 The target board is the so-called Black Pill, with a STM32F411CEU chip. This is working progress, not done yet. Something works, it seems to be able to save files to the SD Card. More information to follow.
 
+Update: 
+- Now saving and loading from SD card seems to work.
+- The STM32 chip implements USB CDC driver i.e. serial port for debug output
+
+### SD card connection
+| MCU   | SD card |
+|-------|---------|
+| PB12  | /CS     |
+| PB13  | SCK     |
+| PB15  | MOSI    |
+| PB14  | MISO    |
+
+### Connection to TI-74 Dockbbus
+| MCU  | Dockbus pin |
+|------|-------------|
+| N.C  | 1 - PO      |
+| N.C. | 2 - PI      |
+| PB4  | 3 - D0      |
+| PB3  | 4 - D1      |
+| PB6  | 5 - D2      |
+| PB7  | 6 - D3      |
+| PB8  | 7 - HSK     |
+| PB9  | 8 - BAV     |
+| N.C. | 9 - RESET   |
+| GND  | 10 - GND    |
+
+
+
 ## License of the STM32 derived work
 Licenses as in the original project, except for the STM32 libraries and generated code which are distributed with their respective licenses. Not sure if all the license text is included in this repository yet.
 
