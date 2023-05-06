@@ -19,6 +19,8 @@ Update:
 | PB13  | SCK     |
 | PB15  | MOSI    |
 | PB14  | MISO    |
+| GND   | GND     |
+| 3.3V  | 3.3V VCC |
 
 ### Connection to TI-74 Dockbbus
 | MCU  | Dockbus pin |
@@ -34,6 +36,7 @@ Update:
 | N.C. | 9 - RESET   |
 | GND  | 10 - GND    |
 
+Note: The pins are in the order in which the align directly between the TI-74 Dockbus connector and Black Pill board pins, **EXCEPT** for PB5 which is not 5V tolerant. The corresponding signal is wired to PB3.
 
 
 ## License of the STM32 derived work
