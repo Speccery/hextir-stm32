@@ -2,6 +2,8 @@
 TI HEX-BUS SD Drive Interface
 Copyright (C) 2017-20  Jim Brain
 
+STM32 port copyright (C) 2023 Erik Piehl. Mostly this port amounts to low level code to compensate for hardware peripheral differences. 
+
 ## STM32 version
 By Erik Piehl 2023.
 Started by creating a fresh STM32 project with STM32CubeIDE. Copied in the source files from the Arduino IDE version (see below). I initially planned to branch the STM32 version, but since I wanted to use the goodies such as SWD debugger of the STM32CubeIDE I recreated the whole project.
