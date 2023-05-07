@@ -5,7 +5,11 @@ Copyright (C) 2017-20  Jim Brain
 STM32 port copyright (C) 2023 Erik Piehl. Mostly this port amounts to low level code to compensate for hardware peripheral differences. 
 
 ## STM32 version
-By Erik Piehl 2023.
+![TI-74 STM32 HEXTIr](https://user-images.githubusercontent.com/18168418/236661417-a68b4959-abe9-4966-a047-505b0aee5f7a.jpeg)
+![TI-74 HEXTIr Black Pill](https://user-images.githubusercontent.com/18168418/236661421-4860373f-213b-4479-9eae-8484145d28b4.jpeg)
+
+Created by Erik Piehl 2023.
+
 Started by creating a fresh STM32 project with STM32CubeIDE. Copied in the source files from the Arduino IDE version (see below). I initially planned to branch the STM32 version, but since I wanted to use the goodies such as SWD debugger of the STM32CubeIDE I recreated the whole project.
 
 The target board is the so-called Black Pill, with a STM32F411CEU chip. This is working progress, not done yet. Something works, it seems to be able to save files to the SD Card. More information to follow.
@@ -40,9 +44,19 @@ Update:
 
 Note: The pins are in the order in which the align directly between the TI-74 Dockbus connector and Black Pill board pins, **EXCEPT** for PB5 which is not 5V tolerant. The corresponding signal is wired to PB3.
 
+## Why did I create this?
+The original HEXTIr project is already great. But I have a couple of reasons: 
+- Fun. Porting to a 32-bit processor architecture a working project sounded like a nice short thing to do.
+- Personal preference. I much prefer these days ARM based boards over the AVR based Arduinos. 
+- Size. This is a much more compact design with off the self boards compared to an original Arduino + shield. Granted, there are small arduino boards too.
+- Price. The pair of a Black Pill board + SD card extender is certainly not more expensive than an Arduino + SD card shield.
+- IDE. Even if STM32CubeIDE has some short comings (mainly being huge and the editor not as agile as Visual Studio Code IMHO), it is in every way so much better development environment than the Arduino IDE. Not least due to the debugging capabilities.
+- Memory size. In the original project documentation (see below) one of the issues Jim seems to have had is that the project really filled up the 32K of Flash memory on the AVR Mega 328. Of course there are larger AVR chips too, but the amount of memory is a problem when expanding the design, which I intend to do. With STM32F411CEU chip the flash size is 512K, so here there is 16x the flash memory size. Even bigger advantage with RAM: 128k here versus 2k on the AVR Mega 328.
+- 32-bits. The ARM is a 32-bit processor, and a Von Neumann design, meaning that it can run code from RAM and it treats from a programmer's model point of view the RAM and Flash memory the same way, i.e. they reside in the same address space, unlike with the AVR.
+- Performance. In this project I run the ARM at 96MHz, as opposed to the 16MHz of the Arduino. Now in the intended use, i.e. provide HEXBUS peripherals for the TI-74, the AT Mega 328 used in the original design was more than fast enough. In fact it probably already is at least 10x times faster than the original peripherals. Even so, extra headrooom doesn't hurt...
 
 ## License of the STM32 derived work
-Licenses as in the original project, except for the STM32 libraries and generated code which are distributed with their respective licenses. Not sure if all the license text is included in this repository yet.
+Licenses as in the original project, including my work, except for the STM32 libraries and generated code which are distributed with their respective licenses. Please see the License files in the repository.
 
 ## Description (original not STM32)
 Coupled with an Atmel ATMEGA328 microcontroller (either as a standalone PCB or an 
