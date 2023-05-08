@@ -513,7 +513,7 @@ DRESULT sd_read(BYTE drv, BYTE *buffer, DWORD sector, BYTE count) {
   uint8_t  res, sec, errors;
   uint16_t crc, recvcrc;
 
-#ifdef STM32
+#if 0 && defined STM32
   char s[80];
   sprintf(s, "sd_read: drv=%d sector=%lu count=%d. ", drv, sector, count);
   debug_puts(s);
@@ -638,7 +638,7 @@ DRESULT sd_write(BYTE drv, const BYTE *buffer, DWORD sector, BYTE count) {
   uint8_t  res, sec, errors;
   uint16_t crc;
 
-#ifdef STM32
+#if 0 && defined STM32
   char s[80];
   sprintf(s, "sd_write: drv=%d sector=%lu count=%d. ", drv, sector,count);
   debug_puts(s);

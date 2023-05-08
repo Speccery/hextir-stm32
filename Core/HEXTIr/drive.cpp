@@ -423,8 +423,12 @@ static void drv_write(pab_t *pab) {
   file_t* file = NULL;
   FRESULT res = FR_OK;
   
+#ifndef STM32
   debug_puts_P("Write File\r\n");
-#ifdef STM32
+#else
+// Commented out the debug message above since timeouts started to occur with these two messages.
+// Meaning that the TI-74 can get fed up in certain circumstances easily.
+
 //  typedef struct _pab_t {
 //    uint8_t dev;
 //    uint8_t cmd;
@@ -433,9 +437,9 @@ static void drv_write(pab_t *pab) {
 //    uint16_t __attribute__((packed)) buflen;
 //    uint16_t __attribute__((packed)) datalen;
 //  } pab_t;
-  char s[80];
+  char s[96];
   sprintf(s, "drv_write: dev=%d cmd=%d lun=%d record=%d buflen=%d datalen=%d\r\n",
-		  pab->dev, pab->cmd, pab->lun, pab->buflen, pab->datalen, pab->record);
+		  pab->dev, pab->cmd, pab->lun,        pab->record, pab->buflen, pab->datalen );
   debug_puts(s);
 #endif
 

@@ -153,7 +153,7 @@ uint8_t crc7update2(uint8_t crc, uint8_t data)
 
 volatile int rxbuf_level = 0;
 uint8_t rxbuf[256];
-uint8_t txbuf[256];
+uint8_t txbuf[512];
 int txbuf_level = 0;
 uint32_t cdc_sent_bytes = 0;
 
@@ -190,7 +190,8 @@ int shift_data_in_tx_buffer(int amount) {
 
 	if(txbuf_level >= amount) {
 		// in efficient - copy data in the buffer to the beginning
-		memcpy(txbuf, txbuf+amount, txbuf_level-amount);
+    if(txbuf_level > amount)
+		  memcpy(txbuf, txbuf+amount, txbuf_level-amount);
 		txbuf_level -= amount;
 	}
 	return amount;
